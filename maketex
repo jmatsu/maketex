@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# considering dropbox sync
+OUTPUT_DIR="${HOME}/.maketex.d/"
+
+# name of main TeX file.
+if [ $# -eq 0 ]; then
+    FILE_NAME_TEX="main.tex"
+else
+	FILE_NAME_TEX="$1"
+	FILE_NAME_TEX=${FILE_NAME_TEX##*/}
+fi
+
+# remove extention
+case $FILE_NAME_TEX in
+	*\.tex)
+		FILE_NAME_NO_EXTENTION=`echo $FILE_NAME_TEX | sed -e "s/\.tex//"`
+		;;
+	*)
+		FILE_NAME_NO_EXTENTION=$FILE_NAME_TEX
+		;;
+esac
+
+# make output dir
+if [ ! -d $OUTPUT_DIR ]; then
+	mkdir -p $OUTPUT_DIR
+fi
+
+# module load
+. extract.fnc
+
+# main flow
+flow_make_tex $OUTPUT_DIR $FILE_NAME_NO_EXTENTION
