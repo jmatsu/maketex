@@ -19,6 +19,7 @@ else
 
       # trim path to file's directory.
     	FILEPATH=${arg%/*}
+        echo $FILEPATH
 
       if [ "$EXTENTION" = "png" ]; then
         echo "detect png!"
@@ -45,9 +46,11 @@ else
       # eps exist?
    		if [ ! -f $FILENAME_GEN_EPS ]; then
         # png to eps (use eps2 option)
+        echo "target is $TARGET_PNG_FILE"
         convert $TARGET_PNG_FILE eps2:$FILENAME_GEN_EPS
 
         # original png file move to png-directory
+        echo "move to $FILEPATH$GEN_PNG_DIR"
         move_file $FILEPATH$GEN_PNG_DIR $TARGET_PNG_FILE
    		fi
     done
