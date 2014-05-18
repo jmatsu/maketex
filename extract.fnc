@@ -1,6 +1,3 @@
-#!/bin/bash
-
-## function declaration begin
 
 # ${MAINFILE_LOCATION}/figures
 function get_path_to_figure()
@@ -72,13 +69,13 @@ function get_tex_opt()
 function flow_make_tex()
 {
 	OUTPUT_DIR=$1
-	FILE_NAME_NO_EXTENSION=$2
+	FILE_NAME_NO_EXTENTION=$2
 	FILE_LOCATION=$3
 
-	FILE_NAME_MAIN="${FILE_LOCATION}${FILE_NAME_NO_EXTENSION}"
-	FILE_NAME_PDF="${FILE_LOCATION}${FILE_NAME_NO_EXTENSION}.pdf"
-	FILE_NAME_DVI="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.dvi"
-	FILE_NAME_BBL="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.bbl"
+	FILE_NAME_MAIN="${FILE_LOCATION}${FILE_NAME_NO_EXTENTION}"
+	FILE_NAME_PDF="${FILE_LOCATION}${FILE_NAME_NO_EXTENTION}.pdf"
+	FILE_NAME_DVI="${OUTPUT_DIR}${FILE_NAME_NO_EXTENTION}.dvi"
+	FILE_NAME_BBL="${OUTPUT_DIR}${FILE_NAME_NO_EXTENTION}.bbl"
 
 	PLATEX_OPT=`get_tex_opt '${FILE_NAME_MAIN}.tex`
 
@@ -86,7 +83,7 @@ function flow_make_tex()
 	platex -output-directory $OUTPUT_DIR $FILE_NAME_MAIN $PLATEX_OPT
 
 	# generate bbl
-	pbibtex "${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}"
+	pbibtex "${OUTPUT_DIR}${FILE_NAME_NO_EXTENTION}"
 
 	# bbl
 	sed -i -e 's/^\\newblock//g' $FILE_NAME_BBL
@@ -104,42 +101,3 @@ function flow_make_tex()
 	# open pdf with Preview
 	open -a Preview $FILE_NAME_PDF
 }
-
-## function declaration end
-
-## main flow begin
-
-# considering dropbox sync
-OUTPUT_DIR="${HOME}/.maketex.d/"
-
-# name of main TeX file.
-if [ $# -eq 0 ]; then
-    FILE_NAME_TEX="main.tex"
-    FILE_LOCATION="$CURRENT_LOCATION"
-else
-	FILE_NAME_TEX="$1"
-    FILE_LOCATION="${FILE_NAME_TEX%/*}/"
-	FILE_NAME_TEX=${FILE_NAME_TEX##*/}
-fi
-
-# remove EXTENSION
-case $FILE_NAME_TEX in
-	*\.tex)
-		FILE_NAME_NO_EXTENSION=`echo $FILE_NAME_TEX | sed -e "s/\.tex//"`
-		echo $FILE_NAME_NO_EXTENSION
-		;;
-	*)
-		FILE_NAME_NO_EXTENSION=$FILE_NAME_TEX
-		;;
-esac
-
-# make output dir
-if [ ! -d $OUTPUT_DIR ]; then
-	mkdir -p $OUTPUT_DIR
-fi
-
-# png or pdf to eps.
-gen_eps "${FILE_LOCATION}figures"
-
-# main flow
-flow_make_tex $OUTPUT_DIR $FILE_NAME_NO_EXTENSION $FILE_LOCATION
