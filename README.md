@@ -1,7 +1,7 @@
 maketex
 =======
 
-TeX file control script on OSX. (with pLaTeX)
+TeX file control script for OSX. (with pLaTeX)
 
 ### Features
 
@@ -14,19 +14,29 @@ TeX file control script on OSX. (with pLaTeX)
 
 #### Ready
 
-+ In your shell)
-+ export PATH=$PATH:${path/to/this}
+In your shell)
+	
+	export PATH=$PATH:${path/to/this}
+	or
+	cp -a ./maketex /your/PATH/
+	cp -a ./geneps /your/PATH/
 
-+ In your sublime)
-+ PATH=${path/to/this}:${YOUR_PATH}
+In your sublime)
 
-+ Directory structures)
-+ path/to/main.tex/) main.tex figures/ *.sty *.cls
-+ figures/) *.png *.pdf *.eps
+	PATH=${path/to/this}:${YOUR_PATH}
+
+### Assumed Directory structures)
+
++ path/to/main.tex/ 
+	- main.tex
+	- figures/
+		*  *.png *.pdf *.eps
+	- *.sty
+	- *.cls
 
 #### Command
+
      maketex ${main file(.tex)}
-     '.tex' is not required.
 
 #### Caution
      This script couldn't handle relative path to main tex file. 
