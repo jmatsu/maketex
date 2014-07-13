@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## function declaration begin
 
@@ -80,7 +80,7 @@ function flow_make_tex()
 	FILE_NAME_DVI="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.dvi"
 	FILE_NAME_BBL="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.bbl"
 
-	PLATEX_OPT=`get_tex_opt '${FILE_NAME_MAIN}.tex`
+	PLATEX_OPT=`get_tex_opt '${FILE_NAME_MAIN}.tex'`
 
 	# first platex for aux
 	platex -output-directory $OUTPUT_DIR $FILE_NAME_MAIN $PLATEX_OPT
@@ -118,8 +118,9 @@ if [ $# -eq 0 ]; then
     FILE_LOCATION="$CURRENT_LOCATION"
 else
 	FILE_NAME_TEX="$1"
-    FILE_LOCATION="${FILE_NAME_TEX%/*}/"
-	FILE_NAME_TEX=${FILE_NAME_TEX##*/}
+    FILE_NAME_TEX2="./${FILE_NAME_TEX}"
+    FILE_LOCATION="${FILE_NAME_TEX2%/*}/"
+	FILE_NAME_TEX=${FILE_NAME_TEX2##*/}
 fi
 
 # remove EXTENSION
