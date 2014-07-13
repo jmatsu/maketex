@@ -121,7 +121,7 @@ else
     FILE_NAME_TEX2="./${FILE_NAME_TEX}"
     FILE_LOCATION="${FILE_NAME_TEX%/*}/"
 	FILE_NAME_TEX="${FILE_NAME_TEX##*/}"
-    if [ $FILE_NAME_TEX = $FILE_LOCATION ]; then
+    if [ "${FILE_NAME_TEX}/" = ${FILE_LOCATION} ]; then
     	FILE_LOCATION="${FILE_NAME_TEX2%/*}/"
 		FILE_NAME_TEX="${FILE_NAME_TEX2##*/}"
 	fi
