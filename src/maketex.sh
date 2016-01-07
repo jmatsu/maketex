@@ -48,7 +48,7 @@ function move_file()
 
 function get_tex_opt()
 {
-  ENCODE_OF_FILE=`nkf --guess $1`
+  ENCODE_OF_FILE=$(nkf --guess $1)
 
   case $ENCODE_OF_FILE in
     /shift.jis*/i) # Shift_JIS, Shift-jis
@@ -80,7 +80,7 @@ function flow_make_tex()
   FILE_NAME_DVI="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.dvi"
   FILE_NAME_BBL="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.bbl"
 
-  PLATEX_OPT=`get_tex_opt "${FILE_NAME_MAIN}.tex"`
+  PLATEX_OPT=$(get_tex_opt "${FILE_NAME_MAIN}.tex")
 
   # first platex for aux
   platex -output-directory $OUTPUT_DIR $FILE_NAME_MAIN $PLATEX_OPT
@@ -131,7 +131,7 @@ fi
 # remove EXTENSION
 case $FILE_NAME_TEX in
   *\.tex)
-    FILE_NAME_NO_EXTENSION=`echo $FILE_NAME_TEX | sed -e "s/\.tex//"`
+    FILE_NAME_NO_EXTENSION=$(echo "${FILE_NAME_TEX}" | sed -e 's/\.tex//')
     echo $FILE_NAME_NO_EXTENSION
     ;;
   *)
