@@ -15,24 +15,24 @@ TeX file control script for OSX. (with pLaTeX)
 #### Ready
 
 In your shell)
-	
-	export PATH=$PATH:${path/to/this}
-	or
-	cp -a ./maketex /your/PATH/
-	cp -a ./geneps /your/PATH/
+  
+  export PATH=$PATH:${path/to/this}
+  or
+  cp -a ./maketex /your/PATH/
+  cp -a ./geneps /your/PATH/
 
 In your sublime)
 
-	PATH=${path/to/this}:${YOUR_PATH}
+  PATH=${path/to/this}:${YOUR_PATH}
 
 ### Assumed Directory structures)
 
 + path/to/main.tex/ 
-	- main.tex
-	- figures/
-		*  *.png *.pdf *.eps
-	- *.sty
-	- *.cls
+  - main.tex
+  - figures/
+    *  *.png *.pdf *.eps
+  - *.sty
+  - *.cls
 
 #### Command
 

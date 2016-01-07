@@ -6,8 +6,11 @@ GEN_PNG_DIR="/pngs"
 # Directory :original pdf files will be stored.
 GEN_PDF_DIR="/pdfs"
 
-# load functions
-. extract.fnc
+function move_file()
+{
+  [ ! -d $1 ] && mkdir -p $1
+    mv -f $2 $1"/"
+}
 
 if [ $# -eq 0 ]; then
    echo "No argument is not allowed."
@@ -18,7 +21,7 @@ else
       EXTENTION=${arg##*.}
 
       # trim path to file's directory.
-    	FILEPATH=${arg%/*}
+      FILEPATH=${arg%/*}
         echo $FILEPATH
 
       if [ "$EXTENTION" = "png" ]; then
@@ -27,10 +30,10 @@ else
         TARGET_PNG_FILE="$arg"
 
         # output eps-file name
-     		FILENAME_GEN_EPS=`echo $arg | sed -e "s/.png/.eps/g"`
+         FILENAME_GEN_EPS=`echo $arg | sed -e "s/.png/.eps/g"`
       else
         echo "detect pdf! pdf convert png!"
-        
+
         TARGET_PNG_FILE=`echo $arg | sed -e "s/.pdf/.png/g"`
 
         # output eps file name
@@ -44,14 +47,14 @@ else
       fi
 
       # eps exist?
-   		if [ ! -f $FILENAME_GEN_EPS ]; then
+       if [ ! -f $FILENAME_GEN_EPS ]; then
         # png to eps (use eps2 option)
         echo "target is $TARGET_PNG_FILE"
-        convert $TARGET_PNG_FILE eps2:$FILENAME_GEN_EPS
+        convert $TARGET_PNG_FILE $FILENAME_GEN_EPS
 
         # original png file move to png-directory
         echo "move to $FILEPATH$GEN_PNG_DIR"
         move_file $FILEPATH$GEN_PNG_DIR $TARGET_PNG_FILE
-   		fi
+       fi
     done
 fi

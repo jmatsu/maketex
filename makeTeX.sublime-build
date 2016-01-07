@@ -1,5 +1,5 @@
 {
-	"cmd": ["maketex", "$file"],
-	"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-	"selector": "text.tex"
+  "cmd": ["maketex", "$file"],
+  "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+  "selector": "text.tex"
 }
