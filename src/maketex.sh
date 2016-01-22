@@ -2,22 +2,27 @@
 
 ## function declaration begin
 
+die() {
+  echo "$1" 1>&2
+  exit 1
+}
+
 # ${MAINFILE_LOCATION}/figures
 function get_path_to_figure()
 {
-  TARGET_LOCATION="./figures"
+  local location="./figures"
 
-  if [ ! $# -eq 0 ]; then
-    if [ -d $1 ]; then
-      TARGET_LOCATION="$1"
+  if [[ ! $# -eq 0 ]]; then
+    if [[ -d $1 ]]; then
+      location="$1"
     fi
   fi
 
-  if [ ! -d $TARGET_LOCATION ]; then
-    TARGET_LOCATION="."
+  if [[ ! -d "${location}" ]]; then
+    location="."
   fi
 
-  echo $TARGET_LOCATION
+  echo $location
 }
 
 function find_png_a_pdf()
@@ -37,20 +42,20 @@ function e_bound_box()
 
 function gen_eps()
 {
-  find_png_a_pdf $1 | xargs geneps
+  find_png_a_pdf "$1" | xargs geneps
 }
 
 function move_file()
 {
-  [ ! -d $1 ] && mkdir -p $1
-    mv -f $2 $1"/"
+  [[ ! -d $1 ]] && mkdir -p "$1"
+    mv -f $2 "$1/"
 }
 
 function get_tex_opt()
 {
-  ENCODE_OF_FILE=$(nkf --guess $1)
+  local encode_type=$(nkf --guess "$1")
 
-  case $ENCODE_OF_FILE in
+  case "${encode_type}" in
     /shift.jis*/i) # Shift_JIS, Shift-jis
       echo "-kanji=sjis"
       ;;
@@ -69,83 +74,87 @@ function get_tex_opt()
   esac
 }
 
-function flow_make_tex()
-{
-  OUTPUT_DIR=$1
-  FILE_NAME_NO_EXTENSION=$2
-  FILE_LOCATION=$3
+get_bibfile() {
+  local texfile="$1"
 
-  FILE_NAME_MAIN="${FILE_LOCATION}${FILE_NAME_NO_EXTENSION}"
-  FILE_NAME_PDF="${FILE_LOCATION}${FILE_NAME_NO_EXTENSION}.pdf"
-  FILE_NAME_DVI="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.dvi"
-  FILE_NAME_BBL="${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}.bbl"
+  grep -o "bibliography{[^}]*}" "$texfile"|sed -e 's/[^{]*{\([^}]*\)}/\1/' || echo
+}
 
-  PLATEX_OPT=$(get_tex_opt "${FILE_NAME_MAIN}.tex")
+is_main_file() {
+	if [[ $(head -1 "$1"|tr -d "\t ") = "%maketex:main" ]]; then
+    echo "$1"
+  fi
+}; export -f is_main_file
+
+expand_path() { # use Ruby
+  ruby -e 'puts File.expand_path(ARGV[0])' "$1"
+}
+
+filename_only() {
+  ruby -e 'puts File.basename(ARGV[0], ".tex")' "$1"
+}
+
+main() {
+  local -r output_dir="${HOME}/.maketex.d"
+  local file_location="$(expand_path $1)"
+
+  local -r logfile="${output_dir}/$(date +%s).log"
+
+  {
+  set -x
+  # pre-condition : The main tex file is only one in the directory.
+
+  if [[ ! -d "$file_location" ]]; then
+    file_location="${file_location%/*}"
+  fi
+
+  local filepath=$(find "${file_location}" -name "*.tex" -print0|xargs -0 -I{} bash -c "is_main_file {}"|head -1) || die "main file not found."
+
+  gen_eps "${file_location}/figures"
+
+  local filename_wo_suffix="$(filename_only "$filepath")"
+
+  local platex_options=$(get_tex_opt "$filepath")
+
+  cd "${file_location}"
 
   # first platex for aux
-  platex -output-directory $OUTPUT_DIR $FILE_NAME_MAIN $PLATEX_OPT
+  platex -output-directory "$output_dir" "${filename_wo_suffix}" $platex_options
+
+  local bibfile_wo_suffix=$(get_bibfile "$filepath")
+
+  cp "${bibfile_wo_suffix}.bib" "${output_dir}/"
+
+  cd "$output_dir"
 
   # generate bbl
-  pbibtex "${OUTPUT_DIR}${FILE_NAME_NO_EXTENSION}"
+  pbibtex "${filename_wo_suffix}"
 
   # bbl
-  sed -i -e 's/^\\newblock//g' $FILE_NAME_BBL
-  sed -i -e 's/^: //g' $FILE_NAME_BBL
+  sed -i -e 's/^\\newblock//g' "${filename_wo_suffix}.bbl"
+  sed -i -e 's/^: //g' "${filename_wo_suffix}.bbl"
   # sed -i -e 's/^\\par//g' $FILE_NAME_BBL
 
-  # copy bbl to main tex's location.
-  cp -a $FILE_NAME_BBL $FILE_LOCATION
+  cp -f "${filename_wo_suffix}.bbl" "${file_location}/"
+
+  cd "$file_location"
 
   # refrect bbl to dvi
-  platex -output-directory $OUTPUT_DIR $FILE_NAME_MAIN $PLATEX_OPT
+  platex -output-directory "$output_dir" "${filename_wo_suffix}" $platex_options
+
+  # resolve each-refs
+  platex -output-directory "$output_dir" "${filename_wo_suffix}" $platex_options
 
   # convert dvi to pdf
-  dvipdfmx -o $FILE_NAME_PDF $FILE_NAME_DVI
+  dvipdfmx -o "./${filename_wo_suffix}.pdf" "${output_dir}/${filename_wo_suffix}.dvi"
 
   # open pdf with Preview
-  open -a Preview $FILE_NAME_PDF
+  open -a Preview "./${filename_wo_suffix}.pdf"
+
+  set +x
+  } > "$logfile"
 }
 
 ## function declaration end
 
-## main flow begin
-
-# considering dropbox sync
-OUTPUT_DIR="${HOME}/.maketex.d/"
-
-# name of main TeX file.
-if [ $# -eq 0 ]; then
-    FILE_NAME_TEX="main.tex"
-    FILE_LOCATION="$CURRENT_LOCATION"
-else
-  FILE_NAME_TEX="$1"
-    FILE_NAME_TEX2="./${FILE_NAME_TEX}"
-    FILE_LOCATION="${FILE_NAME_TEX%/*}/"
-    FILE_NAME_TEX="${FILE_NAME_TEX##*/}"
-    if [ "${FILE_NAME_TEX}/" = ${FILE_LOCATION} ]; then
-      FILE_LOCATION="${FILE_NAME_TEX2%/*}/"
-      FILE_NAME_TEX="${FILE_NAME_TEX2##*/}"
-  fi
-fi
-
-# remove EXTENSION
-case $FILE_NAME_TEX in
-  *\.tex)
-    FILE_NAME_NO_EXTENSION=$(echo "${FILE_NAME_TEX}" | sed -e 's/\.tex//')
-    echo $FILE_NAME_NO_EXTENSION
-    ;;
-  *)
-    FILE_NAME_NO_EXTENSION=$FILE_NAME_TEX
-    ;;
-esac
-
-# make output dir
-if [ ! -d $OUTPUT_DIR ]; then
-  mkdir -p $OUTPUT_DIR
-fi
-
-# png or pdf to eps.
-gen_eps "${FILE_LOCATION}figures"
-
-# main flow
-flow_make_tex $OUTPUT_DIR $FILE_NAME_NO_EXTENSION $FILE_LOCATION
+main "$@"
