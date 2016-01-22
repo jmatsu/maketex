@@ -98,7 +98,9 @@ main() {
   local -r output_dir="${HOME}/.maketex.d"
   local file_location="$(expand_path $1)"
 
-  local -r logfile="${output_dir}/$(date +%s).log"
+  local -r logfile="${output_dir}/logs/$(date +%s).log"
+
+  mkdir -p "$output_dir/logs"
 
   {
   set -x
